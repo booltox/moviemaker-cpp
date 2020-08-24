@@ -46,8 +46,9 @@ MovieWriter::MovieWriter(const string &filename_, const unsigned int width_,
   // Setting up the codec.
   AVCodec *codec = avcodec_find_encoder_by_name("libx264");
   AVDictionary *opt = NULL;
-  av_dict_set(&opt, "preset", "slow", 0);
-  av_dict_set(&opt, "crf", "20", 0);
+  av_dict_set(&opt, "preset", "ultrafast", 0);
+  av_dict_set(&opt, "crf", "23", 0);
+  av_dict_set(&opt, "tune", "zerolatency", 0);
   stream = avformat_new_stream(fc, codec);
   c = stream->codec;
   c->width = width;
