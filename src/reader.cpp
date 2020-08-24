@@ -112,6 +112,8 @@ bool MovieReader::getFrame(vector<uint8_t> &pixels) {
   return true;
 }
 
+int MovieReader::getFrameRate() const { return c->framerate.num; }
+
 MovieReader::~MovieReader() {
   // Closing the file.
   if (!(fmt->flags & AVFMT_NOFILE))

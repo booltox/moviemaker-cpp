@@ -1,4 +1,4 @@
-set_project("moviemake-cpp")
+set_project("moviemaker-cpp")
 set_version("0.1.0")
 
 add_requires("vcpkg::ffmpeg", {alias = "ffmpeg"})
@@ -28,8 +28,11 @@ target("moviemaker-cpp")
     -- add_packages("cairo", "librsvg")
     -- add_defines("USE_CAIRO")
 
-    add_includedirs("include")
+    add_includedirs("include", {public = true})
     add_packages("ffmpeg", "x264")
+    if is_os("windows") then
+        add_links("ole32", "Ws2_32", "Secur32", "user32", "Bcrypt")
+    end
 
     add_files("src/*.cpp")
 
@@ -37,15 +40,12 @@ target("moviemaker-cpp-test")
     set_kind("binary")
     handle_mode()
 
-    add_includedirs("include")
+    add_deps("moviemaker-cpp")
     add_packages("ffmpeg", "x264", "gtest")
-    if is_os("windows") then
-        add_links("ole32", "Ws2_32", "Secur32", "user32", "Bcrypt")
-    end
     add_defines("TESTING")
 
     -- if you want cairo and png, svg support
     -- add_packages("cairo", "librsvg")
     -- add_defines("USE_CAIRO")
 
-    add_files("src/*.cpp")
+    add_files("src/test.cpp")

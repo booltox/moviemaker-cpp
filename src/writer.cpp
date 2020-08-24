@@ -22,8 +22,9 @@ public:
 static FFmpegInitialize ffmpegInitialize;
 
 MovieWriter::MovieWriter(const string &filename_, const unsigned int width_,
-                         const unsigned int height_)
-    : width(width_), height(height_), iframe(0), pixels(4 * width * height) {
+                         const unsigned int height_, const int frameRate_)
+    : width(width_), height(height_), iframe(0), frameRate(frameRate_),
+      pixels(4 * width * height) {
 #ifdef USE_CAIRO
   cairo_surface = cairo_image_surface_create_for_data(
       (unsigned char *)&pixels[0], CAIRO_FORMAT_RGB24, width, height,
@@ -52,7 +53,7 @@ MovieWriter::MovieWriter(const string &filename_, const unsigned int width_,
   c->width = width;
   c->height = height;
   c->pix_fmt = AV_PIX_FMT_YUV420P;
-  c->time_base = AVRational{1, 25};
+  c->time_base = AVRational{1, frameRate};
 
   // Setting up the format, its stream(s),
   // linking with the codec(s) and write the header.
@@ -65,7 +66,7 @@ MovieWriter::MovieWriter(const string &filename_, const unsigned int width_,
 
   // Once the codec is set up, we need to let the container know
   // which codec are the streams using, in this case the only (video) stream.
-  stream->time_base = AVRational{1, 25};
+  stream->time_base = AVRational{1, frameRate};
   av_dump_format(fc, 0, filename.c_str(), 1);
   avio_open(&fc->pb, filename.c_str(), AVIO_FLAG_WRITE);
   avformat_write_header(fc, &opt);
@@ -184,7 +185,7 @@ void MovieWriter::addFrame(const uint8_t *pixels) {
     // We set the packet PTS and DTS taking in the account our FPS (second
     // argument), and the time base that our selected format uses (third
     // argument).
-    av_packet_rescale_ts(&pkt, AVRational{1, 25}, stream->time_base);
+    av_packet_rescale_ts(&pkt, AVRational{1, frameRate}, stream->time_base);
 
     pkt.stream_index = stream->index;
 #ifdef DEBUG
@@ -202,7 +203,7 @@ MovieWriter::~MovieWriter() {
     int ret = avcodec_encode_video2(c, &pkt, NULL, &got_output);
     if (got_output) {
       fflush(stdout);
-      av_packet_rescale_ts(&pkt, AVRational{1, 25}, stream->time_base);
+      av_packet_rescale_ts(&pkt, AVRational{1, frameRate}, stream->time_base);
       pkt.stream_index = stream->index;
 #ifdef DEBUG
       printf("Destructor: Writing frame %d (size = %d)\n", iframe++, pkt.size);

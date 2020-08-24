@@ -23,6 +23,7 @@ extern "C" {
 class MovieWriter {
   const unsigned int width, height;
   unsigned int iframe;
+  int frameRate;
 
   SwsContext *swsCtx;
   AVOutputFormat *fmt;
@@ -41,7 +42,7 @@ class MovieWriter {
 
 public:
   MovieWriter(const std::string &filename, const unsigned int width,
-              const unsigned int height);
+              const unsigned int height, const int frameRate = 25);
 
 #ifdef USE_CAIRO
   void addFrame(const std::string &filename);
@@ -71,6 +72,7 @@ public:
               const unsigned int height);
 
   bool getFrame(std::vector<uint8_t> &pixels);
+  int getFrameRate() const;
 
   ~MovieReader();
 };
