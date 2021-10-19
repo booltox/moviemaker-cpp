@@ -48,7 +48,7 @@ public:
   void addFrame(const std::string &filename);
 #endif
 
-  void addFrame(const uint8_t *pixels);
+  void addFrame(const uint8_t *pixels, bool flip = false);
 
   ~MovieWriter();
 };
